@@ -16,19 +16,17 @@ import (
 )
 
 type Config struct {
-	WGEasyAddress         string `json:"WG_Easy_Address"`
-	WGEasyUsername        string `json:"WG_Easy_Username"`
-	WGEasyPassword        string `json:"WG_Easy_Password"`
-	WGEasyExternalAddress string `json:"WG_Easy_External_Address"`
-	WGEasyDNS             string `json:"WG_Easy_DNS"`
-	LDAPServerAddress     string `json:"LDAP_Server_Address"`
-	LDAPbindUsername      string `json:"LDAP_bind_Username"`
-	LDAPbindPassword      string `json:"LDAP_bind_Password"`
-	LDAPBASEDN            string `json:"LDAP_BASEDN"`
-	LDAPOUBASEDN          string `json:"LDAP_OUBASEDN"`
-	LDAPGROUP             string `json:"LDAP_GROUP"`
-	CONFPATH              string `json:"WG_CONF_PATH"`
-	SyncIntervalSeconds   int    `json:"SyncIntervalSeconds"`
+	WGEasyAddress       string `json:"WG_Easy_Address"`
+	WGEasyUsername      string `json:"WG_Easy_Username"`
+	WGEasyPassword      string `json:"WG_Easy_Password"`
+	LDAPServerAddress   string `json:"LDAP_Server_Address"`
+	LDAPbindUsername    string `json:"LDAP_bind_Username"`
+	LDAPbindPassword    string `json:"LDAP_bind_Password"`
+	LDAPBASEDN          string `json:"LDAP_BASEDN"`
+	LDAPOUBASEDN        string `json:"LDAP_OUBASEDN"`
+	LDAPGROUP           string `json:"LDAP_GROUP"`
+	CONFPATH            string `json:"WG_CONF_PATH"`
+	SyncIntervalSeconds int    `json:"SyncIntervalSeconds"`
 }
 
 var (

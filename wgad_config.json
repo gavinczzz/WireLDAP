@@ -3,11 +3,6 @@
   "WG_Easy_Username": "your-username",
   "WG_Easy_Password": "your-password",
 
-
-  "WG_Easy_External_Address": "your-wg-endpoint-address.com:51820",
-  "WG_Easy_DNS": "192.168.1.1",
-
-
   "LDAP_Server_Address": "your-ad-domain.local:389",
   "LDAP_bind_Username": "yourbinduser@your-ad-domain.local",
   "LDAP_bind_Password": "your-bind-password",

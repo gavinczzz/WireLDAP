@@ -16,19 +16,17 @@ import (
 
 // Config defines fields parsed from wgad_config.json, used to configure API and LDAP access.
 type Config struct {
-	WGEasyAddress         string `json:"WG_Easy_Address"`
-	WGEasyUsername        string `json:"WG_Easy_Username"`
-	WGEasyPassword        string `json:"WG_Easy_Password"`
-	WGEasyExternalAddress string `json:"WG_Easy_External_Address"`
-	WGEasyDNS             string `json:"WG_Easy_DNS"`
-	LDAPServerAddress     string `json:"LDAP_Server_Address"`
-	LDAPbindUsername      string `json:"LDAP_bind_Username"`
-	LDAPbindPassword      string `json:"LDAP_bind_Password"`
-	LDAPBASEDN            string `json:"LDAP_BASEDN"`
-	LDAPOUBASEDN          string `json:"LDAP_OUBASEDN"`
-	LDAPGROUP             string `json:"LDAP_GROUP"`
-	CONFPATH              string `json:"WG_CONF_PATH"`
-	SyncIntervalSeconds   int    `json:"SyncIntervalSeconds"`
+	WGEasyAddress       string `json:"WG_Easy_Address"`
+	WGEasyUsername      string `json:"WG_Easy_Username"`
+	WGEasyPassword      string `json:"WG_Easy_Password"`
+	LDAPServerAddress   string `json:"LDAP_Server_Address"`
+	LDAPbindUsername    string `json:"LDAP_bind_Username"`
+	LDAPbindPassword    string `json:"LDAP_bind_Password"`
+	LDAPBASEDN          string `json:"LDAP_BASEDN"`
+	LDAPOUBASEDN        string `json:"LDAP_OUBASEDN"`
+	LDAPGROUP           string `json:"LDAP_GROUP"`
+	CONFPATH            string `json:"WG_CONF_PATH"`
+	SyncIntervalSeconds int    `json:"SyncIntervalSeconds"`
 }
 
 // VPNClient represents a WireGuard client as returned by WG-Easy API.
@@ -180,75 +178,6 @@ func GetClients() ([]ClientSummary, error) {
 	return summary, nil
 }
 
-// GetClientConfig returns the full WireGuard config (.conf) for a given client name.
-func GetClientConfig(name string) (string, error) {
-	cfg, err := GetConfig()
-	if err != nil {
-		return "", fmt.Errorf("failed to load config: %w", err)
-	}
-
-	// Fetch all clients and find the full record (not just the summary)
-	req, err := http.NewRequest("GET", cfg.WGEasyAddress+"/api/client", nil)
-	if err != nil {
-		return "", fmt.Errorf("failed to create GET request: %w", err)
-	}
-	req.SetBasicAuth(cfg.WGEasyUsername, cfg.WGEasyPassword)
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return "", fmt.Errorf("GET request failed: %w", err)
-	}
-	defer resp.Body.Close()
-
-	var allClients []VPNClient
-	body, _ := io.ReadAll(resp.Body)
-	if err := json.Unmarshal(body, &allClients); err != nil {
-		return "", fmt.Errorf("failed to parse response: %w", err)
-	}
-
-	var client *VPNClient
-	for _, c := range allClients {
-		if strings.EqualFold(c.Name, name) {
-			client = &c
-			break
-		}
-	}
-	if client == nil {
-		return "", fmt.Errorf("client %q not found", name)
-	}
-
-	// Inject DNS and Endpoint from config (they aren't populated by the API)
-	dns := cfg.WGEasyDNS
-	endpoint := cfg.WGEasyExternalAddress
-	client.DNS = &dns
-	client.Endpoint = &endpoint
-
-	conf := fmt.Sprintf(`[Interface]
-PrivateKey = %s
-Address = %s/32
-DNS = %s
-MTU = %d
-
-[Peer]
-PublicKey = %s
-PresharedKey = %s
-Endpoint = %s
-AllowedIPs = 0.0.0.0/0
-PersistentKeepalive = %d
-`,
-		client.PrivateKey,
-		client.Address,
-		*client.DNS,
-		client.MTU,
-		client.PublicKey,
-		client.PreSharedKey,
-		*client.Endpoint,
-		client.PersistentKeep,
-	)
-
-	return conf, nil
-}
-
 // DeleteClient removes a VPN client from WG-Easy using its ID.
 func DeleteClient(id int) error {
 	cfg, err := GetConfig()
@@ -353,21 +282,43 @@ func GetClientByName(name string) (ClientSummary, error) {
 	return ClientSummary{}, fmt.Errorf("client %q not found", name)
 }
 
-// WriteClientConfigToFile retrieves the WireGuard config for a given client and writes it to hostname.conf
+// WriteClientConfigToFile retrieves the WireGuard config using the client's ID and writes it to hostname.conf
 func WriteClientConfigToFile(hostname string) error {
 	cfg, err := GetConfig()
 	if err != nil {
 		return fmt.Errorf("failed to load config: %w", err)
 	}
 
-	configText, err := GetClientConfig(hostname)
+	client, err := GetClientByName(hostname)
 	if err != nil {
-		return fmt.Errorf("failed to get client config: %w", err)
+		return fmt.Errorf("failed to get client info: %w", err)
+	}
+
+	url := fmt.Sprintf("%s/api/client/%d/configuration", cfg.WGEasyAddress, client.ID)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return fmt.Errorf("failed to create GET request: %w", err)
+	}
+	req.SetBasicAuth(cfg.WGEasyUsername, cfg.WGEasyPassword)
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("GET request failed: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		return fmt.Errorf("failed to fetch config (HTTP %d): %s", resp.StatusCode, string(body))
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("failed to read response body: %w", err)
 	}
 
 	outputPath := filepath.Join(cfg.CONFPATH, hostname+".conf")
-
-	if err := os.WriteFile(outputPath, []byte(configText), 0600); err != nil {
+	if err := os.WriteFile(outputPath, body, 0600); err != nil {
 		return fmt.Errorf("failed to write config to file: %w", err)
 	}
 
