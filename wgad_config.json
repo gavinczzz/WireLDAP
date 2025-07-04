@@ -1,9 +1,12 @@
 {
-  "WG_Easy_Address": "https://your-wg-easy-domain.com",
+  "WG_Easy_Address": "https://your-wg-easy-gui-domain.com",
   "WG_Easy_Username": "your-username",
   "WG_Easy_Password": "your-password",
-  "WG_Easy_External_Address": "your-wg-public-address.com",
+
+
+  "WG_Easy_External_Address": "your-wg-endpoint-address.com:51820",
   "WG_Easy_DNS": "192.168.1.1",
+
 
   "LDAP_Server_Address": "your-ad-domain.local:389",
   "LDAP_bind_Username": "yourbinduser@your-ad-domain.local",
@@ -13,5 +16,6 @@
   "LDAP_GROUP": "YourVPNGroup",
   
   "WG_CONF_PATH": "C:\\ProgramData\\WGAD\\WG Config Files",
+
   "SyncIntervalSeconds": 5
 }
