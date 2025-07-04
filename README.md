@@ -37,6 +37,7 @@
 
 2. 🛠 **Create your config file**  
    Customize a file named `wgad_config.json` to match your environment. See the [example](https://github.com/gavinczzz/WireLDAP/blob/main/wgad_config.json) below.
+   **Keep in mind that you need to have accurate info in the "WG_Easy_DNS" and "WG_Easy_External_Address" as these go into every config that is generated.**
 
 3. 📁 **Place the config**  
    Put `wgad_config.json` in the same directory as `WGADSync.exe`.
