@@ -24,7 +24,7 @@
 
 ## 🛠 Requirements
 
-- WG-Easy VPN server (reachable by this tool)
+- [WG-Easy](https://github.com/weejewel/wg-easy) VPN server (reachable by this tool)
 - Active Directory Server (you maybe could use a regular LDAP server too)
 - A read-only LDAP bind account
 - Go 1.21+ (only if building from source)
