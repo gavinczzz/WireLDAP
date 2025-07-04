@@ -14,8 +14,8 @@
   - Deletes stale clients that no longer exist in AD  
   - Avoids duplication by tracking previously provisioned entries
 
-- 🔐 **Stores WireGuard config in AD (not files)**  
-  Saves the contents of each client's WireGuard `.conf` (including `[Interface]`, `[Peer]`, keys, and IPs) into the **`info` attribute** of the corresponding computer object in Active Directory. This enables client agents to retrieve and reconstruct their config directly from AD — no disk distribution needed.
+- 🔐 **Stores WireGuard config in location of your choice**  
+  Saves the contents of each client's WireGuard `.conf` in the path you specify in the config.
 
 - 🧰 **No GUI, runs headless as a service**  
   Silent, background operation. No user interaction required after setup.
